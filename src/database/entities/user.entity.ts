@@ -5,25 +5,13 @@ import { Post } from './post.entity';
 @Entity()
 export class User extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id: number;
 
-  // @Column('text', { nullable: true })
-  // firstName: string;
-
-  // @Column('text', { nullable: true })
-  // lastName: string;
-
-  @Column('text', { nullable: false, unique: true })
+  @Column({ unique: true })
   email: string;
 
-  @Column('text', { nullable: false })
+  @Column()
   password: string;
-
-  // @Column('integer', { nullable: true })
-  // age: number;
-
-  // @Column({ default: 'User' })
-  // role: string;
 
   @OneToMany(() => Post, (entity) => entity.user)
   posts?: Post[];

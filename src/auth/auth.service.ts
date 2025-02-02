@@ -1,16 +1,66 @@
-import { Injectable } from '@nestjs/common';
-import { RegisterDto } from './dto/register.dto';
+import {
+  BadRequestException,
+  HttpException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { UpdateAuthDto } from './dto/update-auth.dto';
+import { ForgotPassword, SingUpDto, UserDto } from '../user/dto/user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from '../user/entities/user.entity';
+import { User } from '../database/entities/user.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { InjectRedisClient, RedisClient } from '@webeleon/nestjs-redis';
+import { JwtService } from '@nestjs/jwt';
+import { RegisterDto } from './dto/register.dto';
 
 @Injectable()
 export class AuthService {
+  private redisUserKey = 'user-token';
   constructor(
     @InjectRepository(User)
-    private userRepository: Repository<User>,
+    private readonly userRepository: Repository<User>,
+    @InjectRedisClient() private readonly redisClient: RedisClient,
+    private readonly jwtService: JwtService,
   ) {}
+
+  // async singUpUser(data: UserDto): Promise<{ accessToken: string }> {
+  //   const findUser = await this.userRepository.findOne({
+  //     where: { email: data.email },
+  //   });
+  //   if (findUser) {
+  //     throw new BadRequestException('User with this email already exist.');
+  //   }
+  //   const password = await bcrypt.hash(data.password, 10);
+  //   const user: User = await this.userRepository.save(
+  //     this.userRepository.create({ ...data, password }),
+  //   );
+  //
+  //   const token = await this.signIn(String(user.id), user.email);
+  //
+  //   await this.redisClient.setEx(
+  //     `${this.redisUserKey}-${user.id}`,
+  //     24 * 60 * 60,
+  //     token,
+  //   );
+  //
+  //   // logout
+  //   // await this.redisClient.del(`${this.redisUserKey}-${user.id}`);
+  //
+  //   // -------------------------
+  //   // await this.redisClient.setEx('user', 2 * 60, JSON.stringify(user));
+  //
+  //   // const userInRedis = JSON.parse(
+  //   //   await this.redisClient.get(this.redisUserKey),
+  //   // );
+  //   // -------------------------
+  //   // const userInRedisSecond = JSON.parse(
+  //   //   await this.redisClient.get('user'),
+  //   // );
+  //   // console.log(userInRedis);
+  //
+  //   return { accessToken: token };
+  // }
 
   // ------------REGISTER
 
@@ -19,7 +69,11 @@ export class AuthService {
 
     const existingUser = await this.userRepository.findOneBy({ email });
     if (existingUser) {
-      throw new Error('Email is already in use, try another email');
+      // throw new Error('Email is already in use, try another email');
+      throw new HttpException(
+        'Email is already in use, try another email',
+        400,
+      );
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -33,7 +87,70 @@ export class AuthService {
     return user;
   }
 
-  // ------------------------------------------
+  // // ------------------------------------------
+
+  async validateUser(userId: string, userEmail: string): Promise<User> {
+    if (!userId || !userEmail) {
+      throw new UnauthorizedException();
+    }
+    const user = this.userRepository.findOne({
+      where: {
+        id: Number(userId),
+        email: userEmail,
+      },
+    });
+    if (!user) {
+      throw new UnauthorizedException();
+    }
+    return user;
+  }
+
+  async signIn(userId: string, userEmail: string): Promise<string> {
+    return this.jwtService.sign({ id: userId, email: userEmail });
+  }
+
+  async compareHash(password: string, hash: string) {
+    return bcrypt.compare(password, hash);
+  }
+
+  async login(data: any) {
+    const findUser = await this.userRepository.findOne({
+      where: { email: data.email },
+    });
+
+    if (!findUser) {
+      throw new BadRequestException('Wrong email or password');
+    }
+
+    if (!(await this.compareHash(data.password, findUser.password))) {
+      throw new BadRequestException('Wrong email or password');
+    }
+
+    const token = await this.signIn(String(findUser.id), findUser.email);
+
+    await this.redisClient.setEx(
+      `${this.redisUserKey}-${findUser.id}`,
+      24 * 60 * 60,
+      token,
+    );
+
+    return { accessToken: token };
+  }
+
+  async validate(token: string) {
+    try {
+      return this.jwtService.verifyAsync(token);
+    } catch (e) {
+      console.log(e);
+      return null;
+    }
+  }
+
+  create(data: ForgotPassword) {
+    if (data.password !== data.repeatPassword) {
+    }
+    return 'This action adds a new auth';
+  }
 
   findAll() {
     return `This action returns all auth`;
@@ -43,7 +160,7 @@ export class AuthService {
     return `This action returns a #${id} auth`;
   }
 
-  update(id: number, updateAuthDto: any) {
+  update(id: number, updateAuthDto: UpdateAuthDto) {
     return `This action updates a #${id} auth`;
   }
 

@@ -34,6 +34,7 @@ import {
 } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { editFileName, PATH_TO_IMAGE } from '../common/utils/upload.utils';
+import { JwtAuthGuard } from '../common/guards/jwt.auth.guard';
 
 // @UseGuards(AuthGuard())
 @ApiTags('User')
@@ -42,85 +43,91 @@ import { editFileName, PATH_TO_IMAGE } from '../common/utils/upload.utils';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @ApiResponse({ status: HttpStatus.CREATED, type: AccountResponseDto })
-  @Post('/create')
-  async createUser(@Body() createUserDto: UserDto) {
-    return this.userService.create(createUserDto);
+  @Get('list')
+  @UseGuards(JwtAuthGuard)
+  async getAllUsers() {
+    return this.userService.getAllUsers();
   }
 
-  @Roles('Admin', 'Manager')
-  @UseGuards(AuthGuard(), RoleGuard)
-  @ApiPaginatedResponse('entities', UserItemDto)
-  @Get('/list')
-  findAll(@Query() query: BaseQueryDto) {
-    return this.userService.findAll(query);
-  }
-
-  @Patch('avatar')
-  @UseInterceptors(
-    FileInterceptor('image', {
-      storage: diskStorage({
-        destination: `.${PATH_TO_IMAGE}`,
-        filename: editFileName,
-      }),
-    }),
-  )
-  updateAvatar(
-    @Param('id') id: string,
-    @UploadedFile(
-      new ParseFilePipe({
-        validators: [
-          new MaxFileSizeValidator({ maxSize: 1000000000 }), // bytes
-          new FileTypeValidator({ fileType: 'image/png' }),
-        ],
-      }),
-    )
-    file: Express.Multer.File,
-  ) {
-    return this.userService.findOne(Number(id), file.filename);
-  }
-
-  @UseGuards(AuthGuard())
-  @Patch('gallery')
-  @UseInterceptors(
-    FileFieldsInterceptor(
-      [
-        { name: 'image', maxCount: 1 },
-        { name: 'imageLogo', maxCount: 1 },
-      ],
-      {
-        storage: diskStorage({
-          destination: `.${PATH_TO_IMAGE}`,
-          filename: editFileName,
-        }),
-      },
-    ),
-  )
-  updateImages(
-    @Param('id') id: string,
-    @UploadedFiles()
-    files: { image?: Express.Multer.File[]; imageLogo?: Express.Multer.File[] },
-    @Body() body: any,
-    @Req() req: any,
-  ) {
-    if (files?.image) {
-      body.photo = `${PATH_TO_IMAGE}/${files.image[0].filename}`;
-    }
-    if (files?.imageLogo) {
-      body.logo = `${PATH_TO_IMAGE}/${files.imageLogo[0].filename}`;
-    }
-    return this.userService.updateOne(Number(id), body, req.user);
-  }
-
-  @Roles('Admin')
-  @UseGuards(AuthGuard(), RoleGuard)
-  @Patch('/roles/:id')
-  update(@Param('id') id: string) {
-    return this.userService.update(+id);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
-  }
+  // @ApiResponse({ status: HttpStatus.CREATED, type: AccountResponseDto })
+  // @Post('/create')
+  // async createUser(@Body() createUserDto: UserDto) {
+  //   return this.userService.create(createUserDto);
+  // }
+  //
+  // @Roles('Admin', 'Manager')
+  // @UseGuards(AuthGuard(), RoleGuard)
+  // @ApiPaginatedResponse('entities', UserItemDto)
+  // @Get('/list')
+  // findAll(@Query() query: BaseQueryDto) {
+  //   return this.userService.findAll(query);
+  // }
+  //
+  // @Patch('avatar')
+  // @UseInterceptors(
+  //   FileInterceptor('image', {
+  //     storage: diskStorage({
+  //       destination: `.${PATH_TO_IMAGE}`,
+  //       filename: editFileName,
+  //     }),
+  //   }),
+  // )
+  // updateAvatar(
+  //   @Param('id') id: string,
+  //   @UploadedFile(
+  //     new ParseFilePipe({
+  //       validators: [
+  //         new MaxFileSizeValidator({ maxSize: 1000000000 }), // bytes
+  //         new FileTypeValidator({ fileType: 'image/png' }),
+  //       ],
+  //     }),
+  //   )
+  //   file: Express.Multer.File,
+  // ) {
+  //   return this.userService.findOne(Number(id), file.filename);
+  // }
+  //
+  // @UseGuards(AuthGuard())
+  // @Patch('gallery')
+  // @UseInterceptors(
+  //   FileFieldsInterceptor(
+  //     [
+  //       { name: 'image', maxCount: 1 },
+  //       { name: 'imageLogo', maxCount: 1 },
+  //     ],
+  //     {
+  //       storage: diskStorage({
+  //         destination: `.${PATH_TO_IMAGE}`,
+  //         filename: editFileName,
+  //       }),
+  //     },
+  //   ),
+  // )
+  // updateImages(
+  //   @Param('id') id: string,
+  //   @UploadedFiles()
+  //   files: { image?: Express.Multer.File[]; imageLogo?: Express.Multer.File[] },
+  //   @Body() body: any,
+  //   @Req() req: any,
+  // ) {
+  //   if (files?.image) {
+  //     body.photo = `${PATH_TO_IMAGE}/${files.image[0].filename}`;
+  //   }
+  //   if (files?.imageLogo) {
+  //     body.logo = `${PATH_TO_IMAGE}/${files.imageLogo[0].filename}`;
+  //   }
+  //   return this.userService.updateOne(Number(id), body, req.user);
+  // }
+  //
+  // @Roles('Admin')
+  // @UseGuards(AuthGuard(), RoleGuard)
+  // @Patch('/roles/:id')
+  // update(@Param('id') id: string) {
+  //   return this.userService.update(+id);
+  // }
+  //
+  // @Delete(':id')
+  // remove(@Param('id') id: string) {
+  //   return this.userService.remove(+id);
+  // }
 }

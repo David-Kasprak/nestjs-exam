@@ -33,6 +33,7 @@ export class UserService {
       page: +query?.page || 1,
       limit: +query?.limit || 10,
     };
+
     // const queryBuilder = await this.userRepository
     //     .createQueryBuilder('user')
     //     .leftJoinAndSelect('user.posts', 'post')
@@ -82,6 +83,10 @@ export class UserService {
       countItems: total,
       entities: entities,
     };
+  }
+
+  async getAllUsers() {
+    return this.userRepository.find();
   }
 
   findOne(id: number, fileName?: any) {

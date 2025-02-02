@@ -18,6 +18,7 @@ import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { JwtAuthGuard } from '../common/guards/jwt.auth.guard';
 import { Request as ExpressRequest } from 'express';
+import { LogoutDto } from './dto/logout.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -32,5 +33,10 @@ export class AuthController {
   @Post('login')
   async login(@Body() body: LoginDto) {
     return this.authService.login(body);
+  }
+
+  @Post('logout')
+  async logout(@Body() body: LogoutDto) {
+    return this.authService.logout(body);
   }
 }

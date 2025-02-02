@@ -14,6 +14,7 @@ import { InjectRedisClient, RedisClient } from '@webeleon/nestjs-redis';
 import { JwtService } from '@nestjs/jwt';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { LogoutDto } from './dto/logout.dto';
 
 @Injectable()
 export class AuthService {
@@ -72,7 +73,7 @@ export class AuthService {
     if (existingUser) {
       throw new HttpException(
         'Email is already in use, try another email',
-        400,
+        409,
       );
     }
 
@@ -95,7 +96,7 @@ export class AuthService {
     }
     const user = this.userRepository.findOne({
       where: {
-        id: Number(userId),
+        id: userId,
         email: userEmail,
       },
     });
@@ -137,23 +138,43 @@ export class AuthService {
     return { accessToken: token };
   }
 
+  async logout(data: LogoutDto) {
+    const userId = data.userId;
+
+    if (!userId) {
+      throw new BadRequestException('User not found, enter userId');
+    }
+
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    await this.redisClient.del(`${this.redisUserKey}-${userId}`);
+
+    return { message: 'Logged out successfully' };
+  }
+
   // async logout(userId: string) {
   //   await this.redisClient.del(`user-token-${userId}`);
   //   return { message: 'User logged out successfully' };
   // }
 
-  async logoutUser(userId: string) {
-    const tokenKey = `${this.redisUserKey}-${userId}`;
-    const exists = await this.redisClient.exists(tokenKey);
-
-    if (!exists) {
-      throw new BadRequestException('User is not logged in or session expired');
-    }
-
-    await this.redisClient.del(tokenKey);
-
-    return { message: 'User logged out successfully' };
-  }
+  // async logoutUser(userId: string) {
+  //   const tokenKey = `${this.redisUserKey}-${userId}`;
+  //   const exists = await this.redisClient.exists(tokenKey);
+  //
+  //   if (!exists) {
+  //     throw new BadRequestException('User is not logged in or session expired');
+  //   }
+  //
+  //   await this.redisClient.del(tokenKey);
+  //
+  //   return { message: 'User logged out successfully' };
+  // }
 
   async validate(token: string) {
     try {

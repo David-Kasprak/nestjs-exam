@@ -5,8 +5,8 @@ import { Post } from './post.entity';
 @Entity()
 export class User extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
-  id: number;
-
+  // id: number;
+  id: string;
   @Column({ unique: true })
   email: string;
 

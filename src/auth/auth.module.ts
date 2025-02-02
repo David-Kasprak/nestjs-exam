@@ -7,6 +7,7 @@ import { RedisModule } from '@webeleon/nestjs-redis';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { BearerStrategy } from './bearer.strategy';
+import { JwtStrategy } from './jwt.strategy';
 
 @Module({
   imports: [
@@ -23,7 +24,7 @@ import { BearerStrategy } from './bearer.strategy';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, BearerStrategy],
+  providers: [AuthService, BearerStrategy, JwtStrategy],
   exports: [AuthService, PassportModule],
 })
 export class AuthModule {}

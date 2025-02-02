@@ -13,6 +13,7 @@ import * as bcrypt from 'bcrypt';
 import { InjectRedisClient, RedisClient } from '@webeleon/nestjs-redis';
 import { JwtService } from '@nestjs/jwt';
 import { RegisterDto } from './dto/register.dto';
+import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export class AuthService {
@@ -69,7 +70,6 @@ export class AuthService {
 
     const existingUser = await this.userRepository.findOneBy({ email });
     if (existingUser) {
-      // throw new Error('Email is already in use, try another email');
       throw new HttpException(
         'Email is already in use, try another email',
         400,
@@ -113,7 +113,7 @@ export class AuthService {
     return bcrypt.compare(password, hash);
   }
 
-  async login(data: any) {
+  async login(data: LoginDto) {
     const findUser = await this.userRepository.findOne({
       where: { email: data.email },
     });
@@ -137,6 +137,24 @@ export class AuthService {
     return { accessToken: token };
   }
 
+  // async logout(userId: string) {
+  //   await this.redisClient.del(`user-token-${userId}`);
+  //   return { message: 'User logged out successfully' };
+  // }
+
+  async logoutUser(userId: string) {
+    const tokenKey = `${this.redisUserKey}-${userId}`;
+    const exists = await this.redisClient.exists(tokenKey);
+
+    if (!exists) {
+      throw new BadRequestException('User is not logged in or session expired');
+    }
+
+    await this.redisClient.del(tokenKey);
+
+    return { message: 'User logged out successfully' };
+  }
+
   async validate(token: string) {
     try {
       return this.jwtService.verifyAsync(token);
@@ -146,25 +164,25 @@ export class AuthService {
     }
   }
 
-  create(data: ForgotPassword) {
-    if (data.password !== data.repeatPassword) {
-    }
-    return 'This action adds a new auth';
-  }
-
-  findAll() {
-    return `This action returns all auth`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
-  }
-
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
-  }
+  // create(data: ForgotPassword) {
+  //   if (data.password !== data.repeatPassword) {
+  //   }
+  //   return 'This action adds a new auth';
+  // }
+  //
+  // findAll() {
+  //   return `This action returns all auth`;
+  // }
+  //
+  // findOne(id: number) {
+  //   return `This action returns a #${id} auth`;
+  // }
+  //
+  // update(id: number, updateAuthDto: UpdateAuthDto) {
+  //   return `This action updates a #${id} auth`;
+  // }
+  //
+  // remove(id: number) {
+  //   return `This action removes a #${id} auth`;
+  // }
 }

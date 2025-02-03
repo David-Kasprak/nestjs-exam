@@ -43,6 +43,8 @@ import { editFileName, PATH_TO_IMAGE } from '../common/utils/upload.utils';
 import { JwtAuthGuard } from '../common/guards/jwt.auth.guard';
 import * as uuidValidator from 'uuid-validate';
 import { FilterUsersDto } from './dto/user.filter.dto';
+import { User } from '../database/entities/user.entity';
+import { GetUser } from '../common/decorators/user.get.decorator';
 
 // @UseGuards(AuthGuard())
 @ApiTags('User')
@@ -77,6 +79,12 @@ export class UserController {
   @Post('filter')
   async filterUsers(@Body() filters: FilterUsersDto) {
     return this.userService.filterUsers(filters);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete('delete')
+  async deleteUser(@GetUser() user: User) {
+    return this.userService.deleteUser(user.id);
   }
 
   // @ApiResponse({ status: HttpStatus.CREATED, type: AccountResponseDto })

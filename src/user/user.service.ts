@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { UserDto, UserItemDto } from './dto/user.dto';
 import { BaseQueryDto } from '../common/validators/base.query.validator';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -135,6 +135,16 @@ export class UserService {
       totalCount: total,
       data: users,
     };
+  }
+
+  async deleteUser(userId: string): Promise<void> {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+
+    if (!user) {
+      throw new NotFoundException('User not found, or token is not valid');
+    }
+
+    await this.userRepository.remove(user);
   }
 
   // ------------------------------------

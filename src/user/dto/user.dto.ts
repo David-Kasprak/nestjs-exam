@@ -88,3 +88,15 @@ export class UserItemDto extends SingUpDto {
   @ApiProperty()
   age: number;
 }
+
+// ---------------------------------
+
+export class FindUserDto {
+  @IsString()
+  @IsOptional()
+  email: string;
+
+  @IsString()
+  @IsOptional()
+  id: string;
+}

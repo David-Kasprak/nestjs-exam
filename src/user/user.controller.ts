@@ -16,9 +16,15 @@ import {
   MaxFileSizeValidator,
   FileTypeValidator,
   UploadedFiles,
+  HttpException,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { UserDto, AccountResponseDto, UserItemDto } from './dto/user.dto';
+import {
+  UserDto,
+  AccountResponseDto,
+  UserItemDto,
+  FindUserDto,
+} from './dto/user.dto';
 import { ApiExtraModels, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { BaseQueryDto } from '../common/validators/base.query.validator';
 import {
@@ -35,6 +41,7 @@ import {
 import { diskStorage } from 'multer';
 import { editFileName, PATH_TO_IMAGE } from '../common/utils/upload.utils';
 import { JwtAuthGuard } from '../common/guards/jwt.auth.guard';
+import * as uuidValidator from 'uuid-validate';
 
 // @UseGuards(AuthGuard())
 @ApiTags('User')
@@ -47,6 +54,22 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   async getAllUsers() {
     return this.userService.getAllUsers();
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('find')
+  async findUser(@Body() body: FindUserDto) {
+    const { id, email } = body;
+
+    if (id && uuidValidator(id)) {
+      return this.userService.findById(id); // Если id валидный UUID, ищем по id
+    }
+
+    if (email) {
+      return this.userService.findByEmail(email); // Иначе ищем по email
+    }
+
+    throw new HttpException('Provide id or email of the user', 400);
   }
 
   // @ApiResponse({ status: HttpStatus.CREATED, type: AccountResponseDto })

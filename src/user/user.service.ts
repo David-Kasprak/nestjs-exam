@@ -85,9 +85,21 @@ export class UserService {
     };
   }
 
+  // --------------------------------------
+
   async getAllUsers() {
     return this.userRepository.find();
   }
+
+  async findById(id: string): Promise<User> {
+    return await this.userRepository.findOne({ where: { id } });
+  }
+
+  async findByEmail(email: string): Promise<User> {
+    return await this.userRepository.findOne({ where: { email } });
+  }
+
+  // ------------------------------------
 
   findOne(id: number, fileName?: any) {
     if (fileName) {

@@ -42,6 +42,7 @@ import { diskStorage } from 'multer';
 import { editFileName, PATH_TO_IMAGE } from '../common/utils/upload.utils';
 import { JwtAuthGuard } from '../common/guards/jwt.auth.guard';
 import * as uuidValidator from 'uuid-validate';
+import { FilterUsersDto } from './dto/user.filter.dto';
 
 // @UseGuards(AuthGuard())
 @ApiTags('User')
@@ -62,14 +63,20 @@ export class UserController {
     const { id, email } = body;
 
     if (id && uuidValidator(id)) {
-      return this.userService.findById(id); // Если id валидный UUID, ищем по id
+      return this.userService.findById(id);
     }
 
     if (email) {
-      return this.userService.findByEmail(email); // Иначе ищем по email
+      return this.userService.findByEmail(email);
     }
 
     throw new HttpException('Provide id or email of the user', 400);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('filter')
+  async filterUsers(@Body() filters: FilterUsersDto) {
+    return this.userService.filterUsers(filters);
   }
 
   // @ApiResponse({ status: HttpStatus.CREATED, type: AccountResponseDto })

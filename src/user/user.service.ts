@@ -10,6 +10,7 @@ import { Post } from '../database/entities/post.entity';
 import { PATH_TO_IMAGE } from '../common/utils/upload.utils';
 import * as fs from 'fs';
 import { SocketGateway } from '../socket/socket.gateway';
+import { FilterUsersDto } from './dto/user.filter.dto';
 
 @Injectable()
 export class UserService {
@@ -97,6 +98,43 @@ export class UserService {
 
   async findByEmail(email: string): Promise<User> {
     return await this.userRepository.findOne({ where: { email } });
+  }
+
+  async filterUsers(filters: FilterUsersDto) {
+    const queryBuilder = this.userRepository.createQueryBuilder('user');
+
+    if (filters.email) {
+      queryBuilder.andWhere('user.email LIKE :email', {
+        email: `%${filters.email}%`,
+      });
+    }
+
+    if (filters.createdAfter) {
+      queryBuilder.andWhere('user.createdAt > :createdAfter', {
+        createdAfter: filters.createdAfter,
+      });
+    }
+
+    if (filters.createdBefore) {
+      queryBuilder.andWhere('user.createdAt < :createdBefore', {
+        createdBefore: filters.createdBefore,
+      });
+    }
+
+    if (filters.skip !== undefined) {
+      queryBuilder.skip(filters.skip);
+    }
+
+    if (filters.take !== undefined) {
+      queryBuilder.take(filters.take);
+    }
+
+    const [users, total] = await queryBuilder.getManyAndCount();
+
+    return {
+      totalCount: total,
+      data: users,
+    };
   }
 
   // ------------------------------------

@@ -47,6 +47,7 @@ import { FilterUsersDto } from './dto/user.filter.dto';
 import { User } from '../database/entities/user.entity';
 import { GetUser } from '../common/decorators/user.get.decorator';
 import { UpdateUserDto } from './dto/user.update.dto';
+import { PaginationDto } from './dto/pagination.dto';
 
 // @UseGuards(AuthGuard())
 @ApiTags('User')
@@ -57,8 +58,9 @@ export class UserController {
 
   @Get('list')
   @UseGuards(JwtAuthGuard)
-  async getAllUsers() {
-    return this.userService.getAllUsers();
+  async getAllUsers(@Body() paginationDto: PaginationDto) {
+    const { page, limit } = paginationDto;
+    return this.userService.getAllUsers(page, limit);
   }
 
   @UseGuards(JwtAuthGuard)

@@ -9,8 +9,12 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 
 export class RegisterDto {
-  // @IsEmail()
-  // email: string;
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ required: true })
+  @Transform(({ value }) => value.trim())
+  firstName: string;
+
   @IsString()
   @IsNotEmpty()
   @IsEmail()

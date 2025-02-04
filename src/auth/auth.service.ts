@@ -67,7 +67,7 @@ export class AuthService {
   // ------------REGISTER
 
   async register(registerDto: RegisterDto): Promise<User> {
-    const { email, password } = registerDto;
+    const { firstName, email, password } = registerDto;
 
     const existingUser = await this.userRepository.findOneBy({ email });
     if (existingUser) {
@@ -79,6 +79,7 @@ export class AuthService {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = this.userRepository.create({
+      firstName,
       email,
       password: hashedPassword,
     });

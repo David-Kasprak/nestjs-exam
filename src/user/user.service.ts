@@ -89,16 +89,38 @@ export class UserService {
 
   // --------------------------------------
 
-  async getAllUsers() {
-    return this.userRepository.find();
+  async getAllUsers(page: number, limit: number) {
+    const [users, total] = await this.userRepository.findAndCount({
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
+    return {
+      page,
+      limit,
+      totalCount: total,
+      data: users,
+    };
   }
 
   async findById(id: string): Promise<User> {
-    return await this.userRepository.findOne({ where: { id } });
+    const user = await this.userRepository.findOne({ where: { id } });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
   }
 
   async findByEmail(email: string): Promise<User> {
-    return await this.userRepository.findOne({ where: { email } });
+    const user = await this.userRepository.findOne({ where: { email } });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
   }
 
   async filterUsers(filters: FilterUsersDto) {
@@ -122,17 +144,19 @@ export class UserService {
       });
     }
 
-    if (filters.skip !== undefined) {
-      queryBuilder.skip(filters.skip);
-    }
+    const page = filters.page || 1;
+    const limit = filters.limit;
 
-    if (filters.take !== undefined) {
-      queryBuilder.take(filters.take);
-    }
+    const skip = (page - 1) * limit;
+    const take = limit;
+
+    queryBuilder.skip(skip).take(take);
 
     const [users, total] = await queryBuilder.getManyAndCount();
 
     return {
+      page,
+      limit,
       totalCount: total,
       data: users,
     };
@@ -158,7 +182,7 @@ export class UserService {
     return user;
   }
 
-  async deleteUser(userId: string): Promise<void> {
+  async deleteUser(userId: string): Promise<string> {
     const user = await this.userRepository.findOne({ where: { id: userId } });
 
     if (!user) {
@@ -166,6 +190,8 @@ export class UserService {
     }
 
     await this.userRepository.remove(user);
+
+    return 'User has been deleted';
   }
 
   // ------------------------------------

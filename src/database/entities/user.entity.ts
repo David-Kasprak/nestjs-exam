@@ -7,11 +7,17 @@ export class User extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   // id: number;
   id: string;
+
+  @Column({ nullable: true })
+  firstName: string;
+
   @Column({ unique: true })
   email: string;
 
   @Column()
   password: string;
+
+  // ---------------
 
   @OneToMany(() => Post, (entity) => entity.user)
   posts?: Post[];

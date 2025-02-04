@@ -18,11 +18,11 @@ export class JwtAuthGuard implements CanActivate {
     }
 
     try {
-      const user = this.jwtService.verify(token); // Декодируем токен
-      request.user = user; // Сохраняем данные пользователя в request для использования в дальнейшем
+      const user = this.jwtService.verify(token);
+      request.user = user;
       return true;
     } catch (e) {
-      return false; // Если токен не валиден, доступ закрыт
+      return false;
     }
   }
 }

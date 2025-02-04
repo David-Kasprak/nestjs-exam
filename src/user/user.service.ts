@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { HttpException, Injectable, NotFoundException } from '@nestjs/common';
 import { UserDto, UserItemDto } from './dto/user.dto';
 import { BaseQueryDto } from '../common/validators/base.query.validator';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -11,6 +11,7 @@ import { PATH_TO_IMAGE } from '../common/utils/upload.utils';
 import * as fs from 'fs';
 import { SocketGateway } from '../socket/socket.gateway';
 import { FilterUsersDto } from './dto/user.filter.dto';
+import { UpdateUserDto } from './dto/user.update.dto';
 
 @Injectable()
 export class UserService {
@@ -135,6 +136,26 @@ export class UserService {
       totalCount: total,
       data: users,
     };
+  }
+
+  async updateUser(
+    userId: string,
+    updateUserDto: UpdateUserDto,
+  ): Promise<User> {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (updateUserDto.firstName) {
+      user.firstName = updateUserDto.firstName;
+    }
+    if (updateUserDto.email) {
+      user.email = updateUserDto.email;
+    }
+    await this.userRepository.save(user);
+    return user;
   }
 
   async deleteUser(userId: string): Promise<void> {

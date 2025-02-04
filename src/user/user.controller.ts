@@ -17,6 +17,7 @@ import {
   FileTypeValidator,
   UploadedFiles,
   HttpException,
+  Put,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import {
@@ -45,6 +46,7 @@ import * as uuidValidator from 'uuid-validate';
 import { FilterUsersDto } from './dto/user.filter.dto';
 import { User } from '../database/entities/user.entity';
 import { GetUser } from '../common/decorators/user.get.decorator';
+import { UpdateUserDto } from './dto/user.update.dto';
 
 // @UseGuards(AuthGuard())
 @ApiTags('User')
@@ -79,6 +81,15 @@ export class UserController {
   @Post('filter')
   async filterUsers(@Body() filters: FilterUsersDto) {
     return this.userService.filterUsers(filters);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Put('update')
+  async updateUser(
+    @GetUser() user: User,
+    @Body() updateUserDto: UpdateUserDto,
+  ): Promise<User> {
+    return this.userService.updateUser(user.id, updateUserDto);
   }
 
   @UseGuards(JwtAuthGuard)

@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
-export class PostDto {
+export class CreatePostDto {
   @ApiProperty({ required: true })
   @IsString()
   @IsNotEmpty()
@@ -10,10 +10,10 @@ export class PostDto {
   @ApiProperty({ required: false })
   @IsString()
   @IsOptional()
-  description: string;
+  description?: string;
 
   @ApiProperty({ required: false })
   @IsString()
-  @IsOptional()
-  body: string;
+  @IsNotEmpty()
+  body?: string;
 }

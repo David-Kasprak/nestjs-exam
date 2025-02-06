@@ -18,6 +18,7 @@ import { User } from '../database/entities/user.entity';
 import { Post as PostEntity } from '../database/entities/post.entity';
 import { PostResponseDto } from './dto/post.response.dto';
 import { PaginationDto } from '../user/dto/pagination.dto';
+import { PostsOfUserFind } from './dto/post.ofUser.find';
 
 @Controller('post')
 export class PostController {
@@ -32,17 +33,25 @@ export class PostController {
     return this.postService.createPost(user, createPostDto);
   }
 
-  @Post('user/:userId')
-  async getPostsOfUser(
-    @Param('userId') userId: string,
-    @Body() paginationDto: PaginationDto,
-  ): Promise<{
+  @Post('user/find')
+  async getPostsOfUser(@Body() body: PostsOfUserFind): Promise<{
     data: PostResponseDto[];
     totalCount: number;
     page: number;
     limit: number;
   }> {
-    return this.postService.getPostsOfUser(userId, paginationDto);
+    const { userId, page, limit, take, skip } = body;
+    return this.postService.getPostsOfUser(userId, page, limit, skip, take);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete('delete')
+  async deletePost(
+    @GetUser() user: User,
+    @Body() body: { postId: string },
+  ): Promise<string> {
+    const { postId } = body;
+    return this.postService.deletePost(user, postId);
   }
 
   // V.1 Working well

@@ -1,4 +1,9 @@
-import { HttpException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  HttpException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { UserDto, UserItemDto } from './dto/user.dto';
 import { BaseQueryDto } from '../common/validators/base.query.validator';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -170,6 +175,10 @@ export class UserService {
 
     if (!user) {
       throw new NotFoundException('User not found');
+    }
+
+    if (user.id !== userId) {
+      throw new ForbiddenException('You can only update yourself');
     }
 
     if (updateUserDto.firstName) {

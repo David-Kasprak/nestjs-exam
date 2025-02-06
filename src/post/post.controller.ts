@@ -9,6 +9,7 @@ import {
   UseGuards,
   NotFoundException,
   Query,
+  Put,
 } from '@nestjs/common';
 import { PostService } from './post.service';
 import { CreatePostDto } from './dto/post.create.dto';
@@ -19,6 +20,7 @@ import { Post as PostEntity } from '../database/entities/post.entity';
 import { PostResponseDto } from './dto/post.response.dto';
 import { PaginationDto } from '../user/dto/pagination.dto';
 import { PostsOfUserFind } from './dto/post.ofUser.find';
+import { UpdatePostDto } from './dto/post.update.dto';
 
 @Controller('post')
 export class PostController {
@@ -45,6 +47,16 @@ export class PostController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Put('update')
+  async updatePost(
+    @GetUser() user: User,
+    @Body() body: { postId: string; updatePostDto: UpdatePostDto },
+  ): Promise<PostEntity> {
+    const { postId, updatePostDto } = body;
+    return this.postService.updatePost(user.id, postId, updatePostDto);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Delete('delete')
   async deletePost(
     @GetUser() user: User,
@@ -53,48 +65,4 @@ export class PostController {
     const { postId } = body;
     return this.postService.deletePost(user, postId);
   }
-
-  // V.1 Working well
-  // @Get('user/:userId')
-  // async getPostsOfUser(
-  //   @Param('userId') userId: string,
-  // ): Promise<PostResponseDto[]> {
-  //   const posts = await this.postService.getPostsOfUser(userId);
-  //   if (!posts || posts.length === 0) {
-  //     throw new NotFoundException(`No posts found for user with id ${userId}`);
-  //   }
-  //   // Преобразуем посты в DTO перед возвратом
-  //   return posts.map((post) => this.toPostResponseDto(post));
-  // }
-  //
-  // // Метод преобразования сущности Post в PostResponseDto
-  // private toPostResponseDto(post: PostEntity): PostResponseDto {
-  //   const { id, title, description, body } = post;
-  //   return { id, title, description, body };
-  // }
-
-  // @Post('posts')
-  // async getPostsOfUser(@Body() userId: string): Promise<PostResponseDto> {
-  //   return this.postService.getPostsOfUser(userId);
-  // }
-
-  // @Get()
-  // findAll() {
-  //   return this.postService.findAll();
-  // }
-  //
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.postService.findOne(+id);
-  // }
-  //
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updatePostDto: PostDto) {
-  //   return this.postService.update(+id, updatePostDto);
-  // }
-  //
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.postService.remove(+id);
-  // }
 }

@@ -14,6 +14,7 @@ import { User } from '../database/entities/user.entity';
 import { PostResponseDto } from './dto/post.response.dto';
 import { PaginationDto } from '../user/dto/pagination.dto';
 import { use } from 'passport';
+import { UpdatePostDto } from './dto/post.update.dto';
 
 @Injectable()
 export class PostService {
@@ -69,6 +70,37 @@ export class PostService {
   private toPostResponseDto(post: Post): PostResponseDto {
     const { id, title, description, body } = post;
     return { id, title, description, body };
+  }
+
+  async updatePost(
+    userId: string,
+    postId: string,
+    updatePostDto: UpdatePostDto,
+  ): Promise<Post> {
+    const post = await this.postRepository.findOne({ where: { id: postId } });
+
+    if (!post) {
+      throw new NotFoundException('Post not found');
+    }
+
+    if (post.user_id !== userId) {
+      throw new ForbiddenException('You can only update your own posts');
+    }
+
+    if (updatePostDto.title) {
+      post.title = updatePostDto.title;
+    }
+
+    if (updatePostDto.description) {
+      post.description = updatePostDto.description;
+    }
+
+    if (updatePostDto.body) {
+      post.body = updatePostDto.body;
+    }
+
+    await this.postRepository.save(post);
+    return post;
   }
 
   async deletePost(user: User, postId: string): Promise<string> {

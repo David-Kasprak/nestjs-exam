@@ -35,6 +35,7 @@ export class AuthController {
     return this.authService.login(body);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post('logout')
   async logout(@Body() body: LogoutDto) {
     return this.authService.logout(body);

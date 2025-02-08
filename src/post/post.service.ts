@@ -60,9 +60,9 @@ export class PostService {
     const postDtos = posts.map(this.toPostResponseDto);
 
     return {
-      page: page,
-      limit: limit,
-      totalCount: total,
+      page: +page,
+      limit: +limit,
+      totalCount: +total,
       data: postDtos,
     };
   }

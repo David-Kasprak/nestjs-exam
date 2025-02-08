@@ -22,6 +22,10 @@ export class FilterUsersDto {
   @IsOptional()
   createdBefore?: string;
 
+  @IsString()
+  @IsOptional()
+  firstName?: string;
+
   // -----------------------
 
   @IsNumber()

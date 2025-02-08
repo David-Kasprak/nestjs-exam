@@ -128,29 +128,49 @@ export class UserService {
     return user;
   }
 
-  async filterUsers(filters: FilterUsersDto) {
+  async filterUsers(
+    email: string,
+    createdAfter: string,
+    createdBefore: string,
+    firstName: string,
+    pageParam: number,
+    limitParam: number,
+    skipParam: number,
+    takeParam: number,
+  ): Promise<{
+    data: User[];
+    totalCount: number;
+    page: number;
+    limit: number;
+  }> {
     const queryBuilder = this.userRepository.createQueryBuilder('user');
 
-    if (filters.email) {
+    if (firstName) {
+      queryBuilder.andWhere('user.firstName LIKE :firstName', {
+        firstName: `%${firstName}%`,
+      });
+    }
+
+    if (email) {
       queryBuilder.andWhere('user.email LIKE :email', {
-        email: `%${filters.email}%`,
+        email: `%${email}%`,
       });
     }
 
-    if (filters.createdAfter) {
+    if (createdAfter) {
       queryBuilder.andWhere('user.createdAt > :createdAfter', {
-        createdAfter: filters.createdAfter,
+        createdAfter: createdAfter,
       });
     }
 
-    if (filters.createdBefore) {
+    if (createdBefore) {
       queryBuilder.andWhere('user.createdAt < :createdBefore', {
-        createdBefore: filters.createdBefore,
+        createdBefore: createdBefore,
       });
     }
 
-    const page = filters.page || 1;
-    const limit = filters.limit;
+    const page = pageParam || 1;
+    const limit = limitParam;
 
     const skip = (page - 1) * limit;
     const take = limit;
@@ -160,8 +180,8 @@ export class UserService {
     const [users, total] = await queryBuilder.getManyAndCount();
 
     return {
-      page,
-      limit,
+      page: +page,
+      limit: +limit,
       totalCount: total,
       data: users,
     };

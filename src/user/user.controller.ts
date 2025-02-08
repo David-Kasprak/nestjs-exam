@@ -64,25 +64,52 @@ export class UserController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post('find')
-  async findUser(@Body() body: FindUserDto) {
-    const { id, email } = body;
-
+  @Get('find/byId')
+  async findUserById(@Query('id') id: string) {
     if (id && uuidValidator(id)) {
       return this.userService.findById(id);
     }
 
+    throw new HttpException('Provide id of the user', 400);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('find/byEmail')
+  async findUserByEmail(@Query('email') email: string) {
     if (email) {
       return this.userService.findByEmail(email);
     }
 
-    throw new HttpException('Provide id or email of the user', 400);
+    throw new HttpException('Provide email of the user', 400);
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post('filter')
-  async filterUsers(@Body() filters: FilterUsersDto) {
-    return this.userService.filterUsers(filters);
+  @Get('filter')
+  async filterUsers(
+    @Query('email') email: string,
+    @Query('createdAfter') createdAfter: string,
+    @Query('createdBefore') createdBefore: string,
+    @Query('firstName') firstName: string,
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
+    @Query('skip') skip: number = 0,
+    @Query('take') take: number = 10,
+  ): Promise<{
+    data: User[];
+    totalCount: number;
+    page: number;
+    limit: number;
+  }> {
+    return this.userService.filterUsers(
+      email,
+      createdAfter,
+      createdBefore,
+      firstName,
+      page,
+      limit,
+      skip,
+      take,
+    );
   }
 
   @UseGuards(JwtAuthGuard)

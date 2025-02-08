@@ -35,16 +35,22 @@ export class PostController {
     return this.postService.createPost(user, createPostDto);
   }
 
-  @Post('user/find')
-  async getPostsOfUser(@Body() body: PostsOfUserFind): Promise<{
+  @Get('user/find')
+  async getPostsOfUser(
+    @Query('userId') userId: string,
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
+    @Query('skip') skip: number = 0,
+    @Query('take') take: number = 10,
+  ): Promise<{
     data: PostResponseDto[];
     totalCount: number;
     page: number;
     limit: number;
   }> {
-    const { userId, page, limit, take, skip } = body;
     return this.postService.getPostsOfUser(userId, page, limit, skip, take);
   }
+
 
   @UseGuards(JwtAuthGuard)
   @Put('update')

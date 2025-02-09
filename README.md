@@ -24,7 +24,9 @@
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+This NestJS project uses postgresql database to store data, and redis to manage accessTokens for users.
+
+Find configuration in src/common/config/configuration.ts
 
 ## Project setup
 
@@ -45,54 +47,93 @@ $ npm run start:dev
 $ npm run start:prod
 ```
 
-## Run tests
+---
+---
 
-```bash
-# unit tests
-$ npm run test
+## HOW TO USE (Docs)
 
-# e2e tests
-$ npm run test:e2e
+Any request should begin with "/api" prefix.
+Example: http://localhost:3000/api/user/list
 
-# test coverage
-$ npm run test:cov
-```
+There are 3 controller routs:
+1. api/auth
+2. api/user
+3. api/post
 
-## Deployment
+Each route has a set of endpoints.
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+---
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+1. /auth has the following endpoints:
+- /auth/register - HTTP Req Method: POST - creating new user;
+EXPECTS the following request body: {
+  "firstName": string,
+  "email": string,
+  "password": string
+  }
 
-```bash
-$ npm install -g mau
-$ mau deploy
-```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+- /auth/login - HTTP Req Method: POST - beginning session / authorizing to get accessToken; EXPECTS the following request body: {
+  "email": string,
+  "password": string
+  }
 
-## Resources
 
-Check out a few resources that may come in handy when working with NestJS:
+- /auth/logout - HTTP Req Method: POST - ending session / deleting this user's accessToken from redis; EXPECTS only Bearer with accessToken: string, no body request needed;
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+---
 
-## Support
+2. /user has the following endpoints:
+- /user/list - HTTP Req Method: GET - getting all registered users; EXPECTS Bearer with accessToken: string + the following query params: page?: number, limit?: number
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
 
-## Stay in touch
+- /user/find/byId - HTTP Req Method: GET - finding a user by id; EXPECTS Bearer with accessToken: string + the only query param - id: string
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+
+- /user/find/byEmail - HTTP Req Method: GET - finding a user by email; EXPECTS Bearer with accessToken: string + the only query param - email: string
+
+
+- /user/filter - HTTP Req Method: GET - getting and filtering all registered users; EXPECTS Bearer with accessToken: string + the following query params: 
+
+email?: string, createdAfter?: string (date), createdBefore?: string (date), firstName?: string, page?: number, limit?: number
+
+- /user/update - HTTP Req Method: PUT - updating the existing registered user (only by owner); EXPECTS Bearer with accessToken: string + the following body request: {
+  "firstName"?: string, "email"?: string
+  }
+
+
+- /user/delete - HTTP Req Method: DELETE - deleting the existing registered user (only by owner); EXPECTS only Bearer with accessToken: string
+
+---
+
+3. /post has the following endpoints:
+- /post/create - HTTP Req Method: POST - EXPECTS Bearer with accessToken: string + the following body request: {
+  "title": string,
+  "body": string,
+  "description"?: string
+  }
+
+
+- /post/user/find - HTTP Req Method: GET - getting all posts of user by id; EXPECTS the following query params: userId: string, page?: number, limit?: number
+
+
+- /post/update - HTTP Req Method: PUT - updating the existing post (only by owner); EXPECTS Bearer with accessToken: string + the following body request: {
+  "postId": string,
+  "updatePostDto": {
+  "title"?: string,
+  "description"?: string,
+  "body"?: string
+  }
+  }
+
+
+- /post/delete - HTTP Req Method: DELETE - deleting the existing post (only by owner); EXPECTS Bearer with accessToken: string + the following body request: {
+  "postId": string
+  }
+
+
+---
+---
 
 ## License
 

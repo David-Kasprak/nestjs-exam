@@ -140,7 +140,7 @@ export class UserService {
     return user;
   }
 
-  async deleteUser(userId: string): Promise<string> {
+  async deleteUser(userId: string): Promise<{ responseMessage: string }> {
     const user = await this.userRepository.findOne({ where: { id: userId } });
 
     if (!user) {
@@ -149,6 +149,6 @@ export class UserService {
 
     await this.userRepository.remove(user);
 
-    return 'User has been deleted';
+    return { responseMessage: 'User has been deleted' };
   }
 }

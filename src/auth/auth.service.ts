@@ -94,7 +94,7 @@ export class AuthService {
     return { accessToken: token };
   }
 
-  async logout(userDto: User): Promise<string> {
+  async logout(userDto: User): Promise<{ responseMessage: string }> {
     const userId = userDto.id;
 
     if (!userId) {
@@ -113,7 +113,7 @@ export class AuthService {
 
     await this.redisClient.del(`${this.redisUserKey}-${userId}`);
 
-    return 'Logged out successfully';
+    return { responseMessage: 'Logged out successfully' };
   }
 
   async validate(token: string) {

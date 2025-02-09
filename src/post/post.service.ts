@@ -97,7 +97,10 @@ export class PostService {
     return post;
   }
 
-  async deletePost(user: User, postId: string): Promise<string> {
+  async deletePost(
+    user: User,
+    postId: string,
+  ): Promise<{ responseMessage: string }> {
     const userFound = await this.userRepository.findOne({
       where: { id: user.id },
     });
@@ -121,6 +124,6 @@ export class PostService {
 
     await this.postRepository.remove(post);
 
-    return 'Post has been deleted';
+    return { responseMessage: 'Post has been deleted' };
   }
 }

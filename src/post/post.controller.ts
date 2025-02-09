@@ -66,7 +66,7 @@ export class PostController {
   async deletePost(
     @GetUser() user: User,
     @Body() body: { postId: string },
-  ): Promise<string> {
+  ): Promise<{ responseMessage: string }> {
     const { postId } = body;
     return this.postService.deletePost(user, postId);
   }

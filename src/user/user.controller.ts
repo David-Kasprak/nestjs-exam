@@ -105,7 +105,9 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @Delete('delete')
   @HttpCode(200)
-  async deleteUser(@GetUser() user: User): Promise<string> {
+  async deleteUser(
+    @GetUser() user: User,
+  ): Promise<{ responseMessage: string }> {
     return this.userService.deleteUser(user.id);
   }
 }

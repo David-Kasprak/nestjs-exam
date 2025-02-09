@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Request,
+  HttpCode,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 // import { CreateAuthDto } from './dto/create-auth.dto';
@@ -28,18 +29,21 @@ export class AuthController {
 
   @ApiOkResponse({ type: SingUpDto })
   @Post('register')
-  async register(@Body() body: RegisterDto) {
+  @HttpCode(201)
+  async register(@Body() body: RegisterDto): Promise<User> {
     return this.authService.register(body);
   }
 
   @Post('login')
-  async login(@Body() body: LoginDto) {
+  @HttpCode(200)
+  async login(@Body() body: LoginDto): Promise<{ accessToken: string }> {
     return this.authService.login(body);
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('logout')
-  async logout(@GetUser() user: User): Promise<{ message: string }> {
+  @HttpCode(200)
+  async logout(@GetUser() user: User): Promise<string> {
     return this.authService.logout(user);
   }
 }

@@ -17,7 +17,7 @@ import {
   FileTypeValidator,
   UploadedFiles,
   HttpException,
-  Put,
+  Put, HttpCode,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import {
@@ -57,6 +57,7 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get('list')
+  @HttpCode(200)
   @UseGuards(JwtAuthGuard)
   async getAllUsers(
     @Query('page') page: number = 1,
@@ -72,7 +73,8 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard)
   @Get('find/byId')
-  async findUserById(@Query('id') id: string) {
+  @HttpCode(200)
+  async findUserById(@Query('id') id: string): Promise<User> {
     if (id && uuidValidator(id)) {
       return this.userService.findById(id);
     }
@@ -82,7 +84,8 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard)
   @Get('find/byEmail')
-  async findUserByEmail(@Query('email') email: string) {
+  @HttpCode(200)
+  async findUserByEmail(@Query('email') email: string): Promise<User> {
     if (email) {
       return this.userService.findByEmail(email);
     }
@@ -92,6 +95,7 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard)
   @Get('filter')
+  @HttpCode(200)
   async filterUsers(
     @Query('email') email: string,
     @Query('createdAfter') createdAfter: string,
@@ -121,6 +125,7 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard)
   @Put('update')
+  @HttpCode(200)
   async updateUser(
     @GetUser() user: User,
     @Body() updateUserDto: UpdateUserDto,
@@ -130,7 +135,8 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard)
   @Delete('delete')
-  async deleteUser(@GetUser() user: User) {
+  @HttpCode(200)
+  async deleteUser(@GetUser() user: User): Promise<string> {
     return this.userService.deleteUser(user.id);
   }
 

@@ -115,7 +115,7 @@ export class AuthService {
     return bcrypt.compare(password, hash);
   }
 
-  async login(data: LoginDto) {
+  async login(data: LoginDto): Promise<{ accessToken: string }> {
     const findUser = await this.userRepository.findOne({
       where: { email: data.email },
     });
@@ -139,7 +139,7 @@ export class AuthService {
     return { accessToken: token };
   }
 
-  async logout(userDto: User) {
+  async logout(userDto: User): Promise<string> {
     const userId = userDto.id;
 
     if (!userId) {
@@ -156,7 +156,7 @@ export class AuthService {
 
     await this.redisClient.del(`${this.redisUserKey}-${userId}`);
 
-    return { message: 'Logged out successfully' };
+    return 'Logged out successfully';
   }
 
   // async logout(userId: string) {

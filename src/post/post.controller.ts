@@ -10,6 +10,7 @@ import {
   NotFoundException,
   Query,
   Put,
+  HttpCode,
 } from '@nestjs/common';
 import { PostService } from './post.service';
 import { CreatePostDto } from './dto/post.create.dto';
@@ -28,14 +29,16 @@ export class PostController {
 
   @UseGuards(JwtAuthGuard)
   @Post('create')
+  @HttpCode(201)
   async createPost(
     @GetUser() user: User,
     @Body() createPostDto: CreatePostDto,
-  ) {
+  ): Promise<PostEntity> {
     return this.postService.createPost(user, createPostDto);
   }
 
   @Get('user/find')
+  @HttpCode(200)
   async getPostsOfUser(
     @Query('userId') userId: string,
     @Query('page') page: number = 1,
@@ -51,9 +54,9 @@ export class PostController {
     return this.postService.getPostsOfUser(userId, page, limit, skip, take);
   }
 
-
   @UseGuards(JwtAuthGuard)
   @Put('update')
+  @HttpCode(200)
   async updatePost(
     @GetUser() user: User,
     @Body() body: { postId: string; updatePostDto: UpdatePostDto },
@@ -64,6 +67,7 @@ export class PostController {
 
   @UseGuards(JwtAuthGuard)
   @Delete('delete')
+  @HttpCode(200)
   async deletePost(
     @GetUser() user: User,
     @Body() body: { postId: string },

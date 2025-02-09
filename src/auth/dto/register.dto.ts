@@ -1,10 +1,4 @@
-import {
-  IsEmail,
-  IsNotEmpty,
-  IsString,
-  Matches,
-  MinLength,
-} from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, Matches } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 
@@ -22,9 +16,6 @@ export class RegisterDto {
   @Transform(({ value }) => value.trim())
   email: string;
 
-  // @IsNotEmpty()
-  // @MinLength(6)
-  // password: string;
   @IsString()
   @Matches(/^\S*(?=\S{8,})(?=\S*[A-Z])(?=\S*[\d])\S*$/, {
     message:

@@ -57,7 +57,6 @@ export class UserDto {
 
 export class ForgotPassword {
   @IsString()
-  // @IsStrongPassword()
   @Matches(/^\S*(?=\S{8,})(?=\S*[A-Z])(?=\S*[\d])\S*$/, {
     message: 'Password must have 1 upper case',
   })

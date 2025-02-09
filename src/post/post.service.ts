@@ -1,9 +1,6 @@
 import {
-  BadRequestException,
-  ConflictException,
   ForbiddenException,
   Injectable,
-  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { CreatePostDto } from './dto/post.create.dto';
@@ -12,13 +9,10 @@ import { Repository } from 'typeorm';
 import { Post } from '../database/entities/post.entity';
 import { User } from '../database/entities/user.entity';
 import { PostResponseDto } from './dto/post.response.dto';
-import { PaginationDto } from '../user/dto/pagination.dto';
-import { use } from 'passport';
 import { UpdatePostDto } from './dto/post.update.dto';
 
 @Injectable()
 export class PostService {
-  // private logger: Logger;
   constructor(
     @InjectRepository(Post) private readonly postRepository: Repository<Post>,
     @InjectRepository(User) private readonly userRepository: Repository<User>,

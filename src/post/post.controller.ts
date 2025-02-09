@@ -3,11 +3,8 @@ import {
   Get,
   Post,
   Body,
-  Patch,
-  Param,
   Delete,
   UseGuards,
-  NotFoundException,
   Query,
   Put,
   HttpCode,
@@ -19,8 +16,6 @@ import { GetUser } from '../common/decorators/user.get.decorator';
 import { User } from '../database/entities/user.entity';
 import { Post as PostEntity } from '../database/entities/post.entity';
 import { PostResponseDto } from './dto/post.response.dto';
-import { PaginationDto } from '../user/dto/pagination.dto';
-import { PostsOfUserFind } from './dto/post.ofUser.find';
 import { UpdatePostDto } from './dto/post.update.dto';
 
 @Controller('post')

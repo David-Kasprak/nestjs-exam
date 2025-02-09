@@ -19,6 +19,8 @@ import { RegisterDto } from './dto/register.dto';
 import { JwtAuthGuard } from '../common/guards/jwt.auth.guard';
 import { Request as ExpressRequest } from 'express';
 import { LogoutDto } from './dto/logout.dto';
+import { GetUser } from '../common/decorators/user.get.decorator';
+import { User } from '../database/entities/user.entity';
 
 @Controller('auth')
 export class AuthController {
@@ -37,7 +39,7 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Post('logout')
-  async logout(@Body() body: LogoutDto) {
-    return this.authService.logout(body);
+  async logout(@GetUser() user: User): Promise<{ message: string }> {
+    return this.authService.logout(user);
   }
 }

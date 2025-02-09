@@ -94,15 +94,23 @@ export class UserService {
 
   // --------------------------------------
 
-  async getAllUsers(page: number, limit: number) {
+  async getAllUsers(
+    page: number,
+    limit: number,
+  ): Promise<{
+    data: User[];
+    totalCount: number;
+    page: number;
+    limit: number;
+  }> {
     const [users, total] = await this.userRepository.findAndCount({
       skip: (page - 1) * limit,
       take: limit,
     });
 
     return {
-      page,
-      limit,
+      page: +page,
+      limit: +limit,
       totalCount: total,
       data: users,
     };

@@ -139,8 +139,8 @@ export class AuthService {
     return { accessToken: token };
   }
 
-  async logout(data: LogoutDto) {
-    const userId = data.userId;
+  async logout(userDto: User) {
+    const userId = userDto.id;
 
     if (!userId) {
       throw new BadRequestException('User not found, enter userId');

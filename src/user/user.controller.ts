@@ -58,8 +58,15 @@ export class UserController {
 
   @Get('list')
   @UseGuards(JwtAuthGuard)
-  async getAllUsers(@Body() paginationDto: PaginationDto) {
-    const { page, limit } = paginationDto;
+  async getAllUsers(
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
+  ): Promise<{
+    data: User[];
+    totalCount: number;
+    page: number;
+    limit: number;
+  }> {
     return this.userService.getAllUsers(page, limit);
   }
 
